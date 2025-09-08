@@ -1,4 +1,4 @@
-CALIBRATION
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -168,3 +168,4 @@ mm,10,30,60,120,240
   </script>
 </body>
 </html>
+
