@@ -490,3 +490,5 @@ mm,10,30,60,120,240
   document.getElementById("go").addEventListener("click", lookup);
   document.getElementById("mm").addEventListener("keydown", (e) => { if (e.key === "Enter") lookup(); });
 </script>
+</body>
+</html>
