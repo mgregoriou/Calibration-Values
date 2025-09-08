@@ -463,11 +463,20 @@ mm,10,30,60,120,240
       }
 
       const exact = (key === mmKey);
-      out.innerHTML = `
-        <span class="ok">Temperature: <strong>${temp} °C</strong></span>
-        <div class="muted">${exact ? "Exact match" : `Closest match at ${key} mm`}</div>
-      `;
-    }
+     const exact = (key === mmKey);
+
+// Calculate calibration differences
+const diff1500 = temp - 1500;
+const diff1520 = temp - 1520;
+
+out.innerHTML = `
+  <span class="ok">Temperature: <strong>${temp} °C</strong></span>
+  <div class="muted">${exact ? "Exact match" : `Closest match at ${key} mm`}</div>
+  <hr style="margin:12px 0;">
+  <div><strong>Δ1500:</strong> ${diff1500} °C</div>
+  <div><strong>Δ1520:</strong> ${diff1520} °C</div>
+`;
+
 
     document.getElementById("go").addEventListener("click", lookup);
     document.getElementById("mm").addEventListener("keydown", (e) => { if (e.key === "Enter") lookup(); });
