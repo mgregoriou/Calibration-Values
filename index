@@ -471,20 +471,38 @@ mm,10,30,60,120,240
       return;
     }
 
-    // exact/closest note
-    const exact = (key === mmKey);
+  // exact/closest note
+const exact = (key === mmKey);
 
-    // Calibration differences
-    const diff1500 = temp - 1500;
-    const diff1520 = temp - 1520;
+// Calibration differences
+const diff1500 = temp - 1500;
+const diff1520 = temp - 1520;
 
-    out.innerHTML = `
-      <span class="ok">Temperature: <strong>${temp} °C</strong></span>
-      <div class="muted">${exact ? 'Exact match' : ('Closest match at ' + key + ' mm')}</div>
-      <hr style="margin:12px 0;">
-      <div><strong>Δ1500:</strong> ${diff1500} °C</div>
-      <div><strong>Δ1520:</strong> ${diff1520} °C</div>
-    `;
+// helpers for style and sign
+const cls = (v) => v > 0 ? 'pos' : (v < 0 ? 'neg' : 'neu');
+const fmt = (v) => (v > 0 ? '+' : '') + v; // prepend + for positives
+
+out.innerHTML = `
+  <span class="ok">Temperature: <strong>${temp} °C</strong></span>
+  <div class="muted">${exact ? 'Exact match' : ('Closest match at ' + key + ' mm')}</div>
+
+  <table class="table-out" role="table" aria-label="Calibration Differences">
+    <thead>
+      <tr><th>Baseline</th><th>Δ (°C)</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1500</td>
+        <td><span class="badge ${cls(diff1500)}">${fmt(diff1500)}</span></td>
+      </tr>
+      <tr>
+        <td>1520</td>
+        <td><span class="badge ${cls(diff1520)}">${fmt(diff1520)}</span></td>
+      </tr>
+    </tbody>
+  </table>
+`;
+
   } // 👈 CLOSES lookup()
 
   // Event handlers (stay outside lookup)
@@ -493,3 +511,4 @@ mm,10,30,60,120,240
 </script>
 </body>
 </html>
+
