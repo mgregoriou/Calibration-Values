@@ -1,60 +1,170 @@
-<!DOCTYPE html>
+CALIBRATION
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Temperature Lookup</title>
+  <meta charset="UTF-8" />
+  <title>Calibration-Values — Temperature Lookup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; }
-    label { display: block; margin: 10px 0 5px; }
-    select, input, button { padding: 6px; font-size: 14px; }
-    #output { margin-top: 20px; font-weight: bold; }
+    :root { --gap: 14px; }
+    body { font-family: system-ui, Arial, sans-serif; line-height: 1.4; padding: 24px; max-width: 720px; margin: 0 auto; }
+    h1 { margin-bottom: var(--gap); }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    label { display: block; margin-top: var(--gap); font-weight: 600; }
+    input, select, button { font-size: 16px; padding: 8px 10px; }
+    input, select { width: 240px; }
+    button { cursor: pointer; border-radius: 8px; border: 1px solid #111827; background: #111827; color: #fff; margin-top: var(--gap); }
+    .row { display: flex; gap: var(--gap); align-items: center; flex-wrap: wrap; }
+    #output { margin-top: 16px; font-weight: 700; }
+    #hint { color: #6b7280; margin-top: 6px; font-size: 14px; }
+    .muted { color: #6b7280; }
+    .note { font-size: 13px; color: #6b7280; margin-top: 18px; }
+    .ok { color: #065f46; }
+    .warn { color: #92400e; }
   </style>
 </head>
 <body>
-  <h2>Temperature Lookup Tool</h2>
-  <label for="mm">Enter Shrinkage (mm):</label>
-  <input type="number" id="mm" step="0.01" placeholder="e.g., 25.50">
+  <h1>Calibration-Values</h1>
+  <div class="card">
+    <h2>Temperature Lookup Tool</h2>
 
-  <label for="minutes">Select Minutes:</label>
-  <select id="minutes">
-    <option value="10">10 Minutes</option>
-    <option value="30">30 Minutes</option>
-    <option value="60">60 Minutes</option>
-    <option value="120">120 Minutes</option>
-    <option value="240">240+ Minutes</option>
-  </select>
+    <div class="row">
+      <div>
+        <label for="mm">Enter Shrinkage (mm):</label>
+        <input id="mm" type="number" step="0.01" placeholder="e.g., 26.86" />
+        <div id="hint">Tip: value is matched to <strong>2 decimals</strong>.</div>
+      </div>
 
-  <button onclick="lookupTemp()">Get Temperature</button>
+      <div>
+        <label for="minutes">Select Minutes:</label>
+        <select id="minutes">
+          <option value="10">10 Minutes</option>
+          <option value="30">30 Minutes</option>
+          <option value="60">60 Minutes</option>
+          <option value="120" selected>120 Minutes</option>
+          <option value="240">240+ Minutes</option>
+        </select>
+      </div>
+    </div>
 
-  <div id="output"></div>
+    <button id="go">Get Temperature</button>
+    <div id="output" aria-live="polite"></div>
+    <div class="note">
+      Data source: TempTAB 700 Batch WLL — Temperature Conversion Table in °C:contentReference[oaicite:1]{index=1}.
+    </div>
+  </div>
 
   <script>
-    // Example data structure extracted from your PDF reference
-    const tempTable = {
-      25.50: {10: null, 30: 1733, 60: 1692, 120: 1649, 240: 1623},
-      25.70: {10: 1750, 30: 1710, 60: 1661, 120: 1631, 240: 1607},
-      26.00: {10: 1711, 30: 1651, 60: 1625, 120: 1615, 240: 1584},
-      27.00: {10: 1582, 30: 1558, 60: 1537, 120: 1514, 240: 1502},
-      28.00: {10: 1445, 30: null, 60: null, 120: null, 240: null}
-      // You would continue filling in values here from your table
-    };
+    /*
+      Minimal embedded dataset (exact values) for the segment around your example.
+      Columns: mm, 10min, 30min, 60min, 120min, 240+min
+      → 26.86 @ 120 min = 1529 °C (matches the reference):contentReference[oaicite:2]{index=2}.
+    */
+    const RAW = `
+mm,10,30,60,120,240
+26.80,1603,1571,1556,1536,1523
+26.81,1602,1570,1556,1535,1522
+26.82,1601,1569,1555,1534,1521
+26.83,1600,1568,1554,1533,1520
+26.84,1599,1567,1554,1531,1519
+26.85,1598,1567,1553,1530,1518
+26.86,1598,1566,1552,1529,1517
+26.87,1597,1566,1552,1528,1516
+26.88,1596,1565,1551,1527,1515
+26.89,1595,1565,1550,1526,1514
+26.90,1594,1564,1549,1525,1513
+`.trim();
 
-    function lookupTemp() {
-      const mm = parseFloat(document.getElementById("mm").value).toFixed(2);
-      const minutes = document.getElementById("minutes").value;
-      const outputDiv = document.getElementById("output");
-
-      if (tempTable[mm] && tempTable[mm][minutes] !== undefined) {
-        const temp = tempTable[mm][minutes];
-        if (temp) {
-          outputDiv.textContent = `At ${mm} mm and ${minutes} minutes, the temperature is ${temp} °C.`;
-        } else {
-          outputDiv.textContent = `No data available for ${mm} mm at ${minutes} minutes.`;
-        }
-      } else {
-        outputDiv.textContent = "Shrinkage value not found in table.";
+    // Parse CSV-ish RAW into a map keyed by mm string with 2 decimals
+    function buildTable(raw) {
+      const lines = raw.split(/\r?\n/);
+      const header = lines.shift(); // not used further, for clarity
+      const map = new Map();
+      for (const line of lines) {
+        const [mm, m10, m30, m60, m120, m240] = line.split(",").map(s => s.trim());
+        map.set(parseFloat(mm).toFixed(2), {
+          10: toNum(m10),
+          30: toNum(m30),
+          60: toNum(m60),
+          120: toNum(m120),
+          240: toNum(m240)
+        });
       }
+      return map;
     }
+
+    function toNum(v) {
+      // Handle N/A gracefully
+      if (v == null) return null;
+      const s = String(v).toUpperCase();
+      if (s === "N/A" || s === "NA" || s === "") return null;
+      const n = Number(s);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    const table = buildTable(RAW);
+
+    // Utility: find the closest existing mm (to 2 decimals) if exact not present
+    function nearestKey(mmStr) {
+      if (table.has(mmStr)) return mmStr;
+      // Search nearest among available keys
+      const target = Number(mmStr);
+      let bestKey = null;
+      let bestDiff = Infinity;
+      for (const k of table.keys()) {
+        const diff = Math.abs(Number(k) - target);
+        if (diff < bestDiff) {
+          bestDiff = diff;
+          bestKey = k;
+        }
+      }
+      return bestKey;
+    }
+
+    function lookup() {
+      const mmInput = document.getElementById("mm").value;
+      const minutes = document.getElementById("minutes").value;
+      const out = document.getElementById("output");
+
+      if (!mmInput) {
+        out.innerHTML = `<span class="warn">Please enter a shrinkage value (mm).</span>`;
+        return;
+      }
+
+      const mm = Number(mmInput);
+      if (!Number.isFinite(mm)) {
+        out.innerHTML = `<span class="warn">That doesn't look like a number.</span>`;
+        return;
+      }
+
+      const mmKey = mm.toFixed(2);
+      const key = nearestKey(mmKey);
+
+      if (!key) {
+        out.textContent = "No data available.";
+        return;
+      }
+
+      const record = table.get(key);
+      const temp = record?.[minutes];
+
+      if (temp == null) {
+        out.innerHTML = `No data for <strong>${mmKey} mm</strong> at <strong>${minutes} minutes</strong>. Closest available mm is <strong>${key}</strong>.`;
+        return;
+      }
+
+      const exact = (key === mmKey);
+      out.innerHTML = `
+        <span class="ok">Temperature: <strong>${temp} °C</strong></span>
+        <div class="muted">${exact ? "Exact match" : `Closest match at ${key} mm`}</div>
+      `;
+    }
+
+    document.getElementById("go").addEventListener("click", lookup);
+
+    // Optional: allow Enter key in the mm field to run
+    document.getElementById("mm").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") lookup();
+    });
   </script>
 </body>
 </html>
