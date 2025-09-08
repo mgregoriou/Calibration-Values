@@ -28,7 +28,6 @@
   <!-- Logo at the top -->
   <img src="OPI.jpg" alt="Company Logo" class="logo">
 
-  <h1>Calibration-Values</h1>
   <div class="card">
     <h2>Temperature Lookup Tool</h2>
 
