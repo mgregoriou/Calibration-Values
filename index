@@ -6,9 +6,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root { --gap: 14px; }
-    body { font-family: system-ui, Arial, sans-serif; line-height: 1.45; padding: 24px; max-width: 860px; margin: 0 auto; }
+    body { font-family: system-ui, Arial, sans-serif; line-height: 1.45; padding: 24px; max-width: 860px; margin: 0 auto; text-align: center; }
     h1 { margin-bottom: var(--gap); }
-    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.06); }
+    .logo { max-width: 240px; height: auto; margin: 0 auto 20px auto; display: block; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px; box-shadow: 0 1px 3px rgba(0,0,0,.06); text-align: left; }
     label { display: block; margin-top: var(--gap); font-weight: 600; }
     input, select, button { font-size: 16px; padding: 8px 10px; }
     input, select { width: 240px; }
@@ -24,6 +25,9 @@
   </style>
 </head>
 <body>
+  <!-- Logo at the top -->
+  <img src="OPI.jpg" alt="Company Logo" class="logo">
+
   <h1>Calibration-Values</h1>
   <div class="card">
     <h2>Temperature Lookup Tool</h2>
@@ -55,7 +59,7 @@
   </div>
 
   <script>
-    // Full table as CSV (mm,10,30,60,120,240). "N/A" is handled gracefully.
+    // Full table (24.63 → 28.00). "N/A" values are handled gracefully.
     const RAW = `
 mm,10,30,60,120,240
 24.63,N/A,N/A,N/A,N/A,1753
