@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Calibration Values TEMPTAB 700 — Temperature Lookup</title>
+  <title>Calibration Values TEMPTAB 700 </title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     :root { --gap: 14px; }
@@ -440,46 +440,53 @@ mm,10,30,60,120,240
       return bestKey;
     }
 
-    function lookup() {
-      const mmInput = document.getElementById("mm").value;
-      const minutes = document.getElementById("minutes").value;
-      const out = document.getElementById("output");
+   function lookup() {
+    const mmInput = document.getElementById("mm").value;
+    const minutes = document.getElementById("minutes").value;
+    const out = document.getElementById("output");
 
-      if (!mmInput) { out.innerHTML = `<span class="warn">Please enter a shrinkage value (mm).</span>`; return; }
-      const mm = Number(mmInput);
-      if (!Number.isFinite(mm)) { out.innerHTML = `<span class="warn">That doesn't look like a number.</span>`; return; }
+    if (!mmInput) { 
+      out.innerHTML = `<span class="warn">Please enter a shrinkage value (mm).</span>`; 
+      return; 
+    }
+    const mm = Number(mmInput);
+    if (!Number.isFinite(mm)) { 
+      out.innerHTML = `<span class="warn">That doesn't look like a number.</span>`; 
+      return; 
+    }
 
-      const mmKey = mm.toFixed(2);
-      const key = nearestKey(mmKey);
-      if (!key) { out.textContent = "No data available."; return; }
+    const mmKey = mm.toFixed(2);
+    const key = nearestKey(mmKey);
+    if (!key) { 
+      out.textContent = "No data available."; 
+      return; 
+    }
 
-      const record = table.get(key);
-      const temp = record?.[minutes];
+    const record = table.get(key);
+    const temp = record?.[minutes];
 
-      if (temp == null) {
-        out.innerHTML = `No data for <strong>${mmKey} mm</strong> at <strong>${minutes} minutes</strong>. Closest available mm is <strong>${key}</strong>.`;
-        return;
-      }
+    if (temp == null) {
+      out.innerHTML = `No data for <strong>${mmKey} mm</strong> at <strong>${minutes} minutes</strong>. Closest available mm is <strong>${key}</strong>.`;
+      return;
+    }
 
-      const exact = (key === mmKey);
-     const exact = (key === mmKey);
+    // exact/closest note
+    const exact = (key === mmKey);
 
-// Calculate calibration differences
-const diff1500 = temp - 1500;
-const diff1520 = temp - 1520;
+    // Calibration differences
+    const diff1500 = temp - 1500;
+    const diff1520 = temp - 1520;
 
-out.innerHTML = `
-  <span class="ok">Temperature: <strong>${temp} °C</strong></span>
-  <div class="muted">${exact ? "Exact match" : `Closest match at ${key} mm`}</div>
-  <hr style="margin:12px 0;">
-  <div><strong>Δ1500:</strong> ${diff1500} °C</div>
-  <div><strong>Δ1520:</strong> ${diff1520} °C</div>
-`;
+    out.innerHTML = `
+      <span class="ok">Temperature: <strong>${temp} °C</strong></span>
+      <div class="muted">${exact ? 'Exact match' : ('Closest match at ' + key + ' mm')}</div>
+      <hr style="margin:12px 0;">
+      <div><strong>Δ1500:</strong> ${diff1500} °C</div>
+      <div><strong>Δ1520:</strong> ${diff1520} °C</div>
+    `;
+  } // 👈 CLOSES lookup()
 
-
-    document.getElementById("go").addEventListener("click", lookup);
-    document.getElementById("mm").addEventListener("keydown", (e) => { if (e.key === "Enter") lookup(); });
-  </script>
-  <div class="src">Values copied from the provided PDF table. :contentReference[oaicite:1]{index=1}</div>
-</body>
-</html>
+  // Event handlers (stay outside lookup)
+  document.getElementById("go").addEventListener("click", lookup);
+  document.getElementById("mm").addEventListener("keydown", (e) => { if (e.key === "Enter") lookup(); });
+</script>
