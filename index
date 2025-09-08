@@ -463,7 +463,8 @@ mm,10,30,60,120,240
     }
 
     const record = table.get(key);
-    const temp = record?.[minutes];
+   const temp = record && record[minutes];
+
 
     if (temp == null) {
       out.innerHTML = `No data for <strong>${mmKey} mm</strong> at <strong>${minutes} minutes</strong>. Closest available mm is <strong>${key}</strong>.`;
