@@ -501,12 +501,12 @@ mm,10,30,60,120,240
 const exact = (key === mmKey);
 
 // Adjustments needed to hit baselines
-const adj1500 = 1500 - temp; // negative = lower temp, positive = raise temp
+const adj1500 = 1500 - temp;   // + = add heat, - = subtract heat
 const adj1520 = 1520 - temp;
 
-// helpers for style and sign
 const cls = (v) => v > 0 ? 'pos' : (v < 0 ? 'neg' : 'neu');
-const fmt = (v) => (v > 0 ? '+' : '') + v; // prepend + for positives
+const dir = (v) => v > 0 ? 'Add' : (v < 0 ? 'Subtract' : 'No change');
+const mag = (v) => Math.abs(v);
 
 out.innerHTML = `
   <span class="ok">Temperature: <strong>${temp} °C</strong></span>
@@ -514,16 +514,18 @@ out.innerHTML = `
 
   <table class="table-out" role="table" aria-label="Calibration Adjustments">
     <thead>
-      <tr><th>Baseline</th><th>Adjustment (°C)</th></tr>
+      <tr><th>Baseline</th><th>Action</th><th>Amount (°C)</th></tr>
     </thead>
     <tbody>
       <tr>
         <td>1500</td>
-        <td><span class="badge ${cls(adj1500)}">${fmt(adj1500)}</span></td>
+        <td><span class="badge ${cls(adj1500)}">${dir(adj1500)}</span></td>
+        <td>${mag(adj1500)}</td>
       </tr>
       <tr>
         <td>1520</td>
-        <td><span class="badge ${cls(adj1520)}">${fmt(adj1520)}</span></td>
+        <td><span class="badge ${cls(adj1520)}">${dir(adj1520)}</span></td>
+        <td>${mag(adj1520)}</td>
       </tr>
     </tbody>
   </table>
@@ -537,5 +539,3 @@ out.innerHTML = `
 </script>
 </body>
 </html>
-
-
