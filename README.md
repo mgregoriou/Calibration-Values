@@ -55,7 +55,7 @@
   <img src="OPI.jpg" alt="Company Logo" class="logo">
 
   <div class="card">
-    <h2>Temperature Lookup Tool</h2>
+    <h2>Temperature Lookup Tool TEMPTAB 700</h2>
 
     <div class="row">
       <div>
